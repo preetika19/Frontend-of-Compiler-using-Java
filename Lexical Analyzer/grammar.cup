@@ -1,0 +1,68 @@
+
+import java_cup.runtime.*;
+
+/**
+Place Terminals Here
+*/
+
+terminal CLASS;                 //2
+terminal READ;                  //3
+terminal PRINT;                 //4
+terminal PRINTLINE;             //5
+terminal RETURN;                //6
+terminal LEFT_CURLY;            //7
+terminal RIGHT_CURLY;           //8
+terminal LEFT_SQUARE;           //9
+terminal RIGHT_SQUARE;          //10
+terminal LEFT_BRACKET;          //11
+terminal RIGHT_BRACKET;         //12
+terminal FINAL;                 //13
+terminal INT;                   //14
+terminal CHAR;                  //15
+terminal BOOL;                  //16
+terminal FLOAT;                 //17
+terminal ASSIGNMENT;            //18
+terminal COLON;                 //19
+terminal SEMI_COLON;            //20
+terminal COMMA;                 //21
+terminal VOID;                  //22
+terminal TRUE;                  //23
+terminal FALSE;                 //24
+terminal NEGATION;              //25
+terminal MULTIPLY;              //26
+terminal DIVIDE;                //27
+terminal ADD;                   //28
+terminal SUBTRACT;              //29
+terminal LESS_THAN;             //30
+terminal GREATER_THAN;          //31
+terminal LESS_THAN_EQUAL;       //32
+terminal GREATER_THAN_EQUAL;    //33
+terminal EQUAL;                 //34
+terminal NOT_EQUAL;             //35
+terminal OR;                    //36
+terminal AND;                   //37
+terminal INCREAMENT;            //38
+terminal DECREAMENT;            //39
+terminal QUESTION;              //40
+terminal IF;                    //41
+terminal ELSE;                  //42
+terminal WHILE;                 //43
+terminal INTLIT;                //44
+terminal FLOATLIT;              //45
+terminal CHARLIT;               //46
+terminal STRLIT;                //47
+terminal ID;                    //48
+terminal SINGLE_LINE_COMMENT;   //49
+terminal MULTI_LINE_COMMENT;    //50
+
+
+/*
+terminal ELSE;                  //42
+terminal ELSE;                  //42
+terminal ELSE;                  //42
+terminal ELSE;                  //42
+terminal ELSE;                  //42
+*/
+
+non terminal dummy;
+dummy ::= ;
