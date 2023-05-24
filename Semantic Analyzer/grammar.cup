@@ -1,0 +1,389 @@
+import java.util.*;
+import java_cup.runtime.*;
+
+/**
+Place Terminals Here
+*/
+
+terminal CLASS;                 //2
+terminal READ;                  //3
+terminal PRINT;                 //4
+terminal PRINTLINE;             //5
+terminal RETURN;                //6
+terminal LEFT_CURLY;            //7
+terminal RIGHT_CURLY;           //8
+terminal LEFT_SQUARE;           //9
+terminal RIGHT_SQUARE;          //10
+terminal LEFT_BRACKET;          //11
+terminal RIGHT_BRACKET;         //12
+terminal FINAL;                 //13
+terminal INT;                   //14
+terminal CHAR;                  //15
+terminal BOOL;                  //16
+terminal FLOAT;                 //17
+terminal ASSIGNMENT;            //18
+terminal COLON;                 //19
+terminal SEMI_COLON;            //20
+terminal COMMA;                 //21
+terminal VOID;                  //22
+terminal TRUE;                  //23
+terminal FALSE;                 //24
+terminal NEGATION;              //25
+terminal MULTIPLY;              //26
+terminal DIVIDE;                //27
+terminal ADD;                   //28
+terminal SUBTRACT;              //29
+terminal LESS_THAN;             //30
+terminal GREATER_THAN;          //31
+terminal LESS_THAN_EQUAL;       //32
+terminal GREATER_THAN_EQUAL;    //33
+terminal EQUAL;                 //34
+terminal NOT_EQUAL;             //35
+terminal OR;                    //36
+terminal AND;                   //37
+terminal INCREAMENT;            //38
+terminal DECREAMENT;            //39
+terminal QUESTION;              //40
+terminal IF;                    //41
+terminal ELSE;                  //42
+terminal WHILE;                 //43
+terminal String INTLIT;                //44
+terminal String FLOATLIT;              //45
+terminal String CHARLIT;               //46
+terminal String STRLIT;                //47
+terminal String ID;                    //48
+terminal SINGLE_LINE_COMMENT;   //49
+terminal MULTI_LINE_COMMENT;    //50
+terminal UPLUS;
+terminal UMINUS;
+
+
+/**
+Place Non-Terminals Here
+*/
+
+non terminal Program program;
+non terminal Memberdecls memberdecls;
+non terminal ArrayList<Fielddecl> fielddecls;
+non terminal ArrayList<Methoddecl> methoddecls;
+non terminal Fielddecl fielddecl;
+non terminal Methoddecl methoddecl;
+/*non terminal Boolean optionalfinal; check it: no need to write it explicitly*/
+non terminal String type;
+//non terminal String binaryOp;
+non terminal Boolean optionalsemi;
+non terminal Expr optionalexpr;
+non terminal Expr expr;
+non terminal Name name;
+non terminal ArrayList<Expr> args;
+non terminal Argdecl argdecl;
+non terminal ArrayList<Argdecl> argdecls;
+non terminal ArrayList<Argdecl> argdecllist;
+non terminal ArrayList<Name> readlist;
+non terminal ArrayList<Expr> printlist;
+non terminal ArrayList<Expr> printlinelist;
+non terminal ArrayList<Stmt> stmts;
+non terminal Stmt stmt;
+non terminal Stmt ifEnd;
+
+
+// PRECEDENCE
+precedence left ELSE;
+precedence left ASSIGNMENT;
+precedence left QUESTION;
+precedence left OR;
+precedence left AND;
+precedence left NOT_EQUAL, EQUAL;
+precedence left GREATER_THAN, GREATER_THAN_EQUAL, LESS_THAN, LESS_THAN_EQUAL;
+precedence left ADD, SUBTRACT;
+precedence left MULTIPLY, DIVIDE;
+precedence left NEGATION, UPLUS, UMINUS;
+
+
+
+// Productions
+program ::= CLASS ID:id LEFT_CURLY memberdecls:ms RIGHT_CURLY
+				{: RESULT = new Program(id, ms); :}
+			;
+
+
+memberdecls ::=	fielddecl:f memberdecls:mds
+									{: RESULT = new Memberdecls(f, mds); :}
+					| methoddecls:ms
+									{: RESULT = new Memberdecls(ms); :}
+							;
+
+
+fielddecls ::=	fielddecl:f fielddecls:fs
+					{:
+						fs.add(0,f);
+						RESULT = fs;
+					:}
+				| 
+					{: RESULT = new ArrayList<Fielddecl>(); :}
+				;
+
+
+methoddecls ::=	methoddecl:m methoddecls:ms
+						{: 
+							ms.add(0,m);
+							RESULT = ms;
+						:}
+				| 
+						{: RESULT = new ArrayList<Methoddecl>(); :}
+				;
+
+
+methoddecl ::=	type:t ID:id LEFT_BRACKET argdecls:as RIGHT_BRACKET LEFT_CURLY fielddecls:fs stmts:sts RIGHT_CURLY optionalsemi:opsemi
+							{: RESULT = new Methoddecl(t, id, as, fs, sts, opsemi); :}
+				| VOID ID:id LEFT_BRACKET argdecls:as RIGHT_BRACKET LEFT_CURLY fielddecls:fs stmts:sts RIGHT_CURLY optionalsemi:opsemi
+							{: RESULT = new Methoddecl("void", id, as, fs, sts, opsemi); :}
+				;
+
+
+fielddecl ::= FINAL type:t ID:id optionalexpr:optionalex SEMI_COLON
+					{: RESULT = new Fielddecl(true, t, id, optionalex); :}
+			|	type:t ID:id optionalexpr:optionalex SEMI_COLON
+					{: RESULT = new Fielddecl(false, t, id, optionalex); :}
+			|	type:t ID:id LEFT_SQUARE INTLIT:intlit RIGHT_SQUARE SEMI_COLON
+					{: RESULT = new Fielddecl(t, id, Integer.parseInt(intlit)); :}
+			;
+
+type ::=	INT
+				{: RESULT = "int"; :}
+		|	FLOAT
+				{: RESULT = "float"; :}
+		|	BOOL
+				{: RESULT = "bool"; :}
+		|   CHAR
+				{: RESULT = "char"; :}
+        ;
+
+
+optionalexpr ::=	ASSIGNMENT expr:e
+							{: RESULT = e; :}
+					|
+							{: RESULT = null; :}
+					;
+
+
+optionalsemi ::=	SEMI_COLON
+							{: RESULT = true; :}
+					|
+							{: RESULT = false; :}
+					;
+
+
+args ::=	expr:e COMMA args:args
+				{:
+					args.add(0,e);
+					RESULT = args;
+			    :}
+			|	expr:e
+				{:
+				    ArrayList<Expr> temp = new ArrayList<Expr>();
+					temp.add(e);
+					RESULT = temp;		
+				:}
+		    ;
+
+
+argdecl ::=	type:t ID:id
+					{: RESULT = new Argdecl(t, id, false); :}
+			|	type:t ID:id LEFT_SQUARE RIGHT_SQUARE
+					{: RESULT = new Argdecl(t, id, true); :}
+			;
+
+
+argdecls ::=	argdecllist:arglist
+						{: RESULT = arglist; :}
+				|
+						{: RESULT = new ArrayList<Argdecl>(); :}
+				;
+
+
+argdecllist ::=	argdecl:a COMMA argdecllist:arglist
+						{:
+							arglist.add(0,a);
+							RESULT = arglist;
+						:}
+				|	argdecl:a
+						{:
+							ArrayList<Argdecl> temp = new ArrayList<Argdecl>();
+							temp.add(a);
+							RESULT = temp;		
+						:}
+				;
+
+
+stmts ::=	stmt:stm stmts:stms
+						{:
+							stms.add(0,stm);
+							RESULT = stms;
+						:}
+				|
+						{: RESULT = new ArrayList<Stmt>(); :}
+				;
+
+
+stmt ::=	IF LEFT_BRACKET expr:e RIGHT_BRACKET stmt:stm ifEnd:elsestmt
+					{: RESULT = new Stmt(e, stm, elsestmt); :}
+			|	WHILE LEFT_BRACKET expr:e RIGHT_BRACKET stmt:stm
+					{: RESULT = new Stmt(e, stm); :}
+			|	name:n ASSIGNMENT expr:e SEMI_COLON
+					{: RESULT = new Stmt(n, e); :}
+			|	READ LEFT_BRACKET readlist:rl RIGHT_BRACKET SEMI_COLON
+					{: RESULT = new Stmt("read", rl); :}
+			| 	PRINT LEFT_BRACKET printlist:pl RIGHT_BRACKET SEMI_COLON
+					{: RESULT = new Stmt("print", pl); :}
+			|	PRINTLINE LEFT_BRACKET printlinelist:pllst RIGHT_BRACKET SEMI_COLON
+					{: RESULT = new Stmt("printline", pllst); :}
+			|	ID:id LEFT_BRACKET RIGHT_BRACKET SEMI_COLON
+					{: RESULT = new Stmt(id); :}
+			|	ID:id LEFT_BRACKET args:args RIGHT_BRACKET SEMI_COLON
+					{: RESULT = new Stmt(id, args, true); :}
+			| 	RETURN SEMI_COLON
+					{: RESULT = new Stmt(); :}
+			| 	RETURN expr:e SEMI_COLON
+					{: RESULT = new Stmt(e); :}
+			|	name:n INCREAMENT SEMI_COLON
+					{: RESULT = new Stmt(n, "++"); :}
+			| 	name:n DECREAMENT SEMI_COLON
+					{: RESULT = new Stmt(n, "--"); :}
+			| 	LEFT_CURLY fielddecls:fs stmts:sts RIGHT_CURLY optionalsemi:opsemi
+					{: RESULT = new Stmt(fs, sts, opsemi); :}
+			;
+
+
+name ::= ID:id
+				{: RESULT = new Name(id); :}
+		| ID:id LEFT_SQUARE expr:e RIGHT_SQUARE
+				{: RESULT = new Name(id, e); :}
+		;
+
+
+ifEnd ::=	ELSE stmt:stm
+					{: RESULT = stm; :}
+			|
+					{: RESULT = null; :}
+			;
+
+
+readlist ::=	name:n COMMA readlist:rl
+						{:
+							rl.add(0,n);
+							RESULT = rl;
+						:}
+				|	name:n
+						{:
+							ArrayList<Name> temp = new ArrayList<Name>();
+							temp.add(n);
+							RESULT = temp;		
+						:}
+				;
+
+
+printlist ::=	expr:e COMMA printlist:pl
+						{:
+							pl.add(0,e);
+							RESULT = pl;
+						:}
+				|	expr:e
+						{:
+							ArrayList<Expr> temp = new ArrayList<Expr>();
+							temp.add(e);
+							RESULT = temp;		
+						:}
+				;
+
+
+
+printlinelist ::=	printlist:pl 
+							{: RESULT = pl; :}
+					|
+							{: RESULT = new ArrayList<Expr>(); :}
+					;
+
+
+
+expr ::=    name:n 
+                    {: RESULT = new Expr(n); :}
+        |	ID:id LEFT_BRACKET RIGHT_BRACKET
+					{: RESULT = new Expr(id, true); :}
+        |	ID:id LEFT_BRACKET args:args RIGHT_BRACKET
+					{: RESULT = new Expr(id, args); :}
+        |	INTLIT:i
+					{: RESULT = new Expr(Integer.parseInt(i)); :}
+        |   CHARLIT:c
+					{: RESULT = new Expr(c, 'c'); :}
+		|   STRLIT:s
+					{: RESULT = new Expr(s, 's'); :}
+        |	FLOATLIT:f
+					{: RESULT = new Expr(Float.parseFloat(f)); :}
+        |   TRUE
+					{: RESULT = new Expr(true); :}
+	    |   FALSE
+					{: RESULT = new Expr(false); :}
+        |   LEFT_BRACKET expr:e RIGHT_BRACKET
+					{: RESULT = new Expr(e); :}
+        |	NEGATION expr:e
+					{: RESULT = new Expr(e, "~"); :}
+        |	SUBTRACT expr:e 
+					{: RESULT = new Expr(e, "-"); :} %prec UMINUS
+		|	ADD expr:e 
+					{: RESULT = new Expr(e, "+"); :} %prec UPLUS
+        |	LEFT_BRACKET type:t RIGHT_BRACKET expr:e
+					{: RESULT = new Expr(t, e); :}
+		|	expr:e1 MULTIPLY expr:e2
+					{: RESULT = new Expr(e1, new BinaryOperator("*"), e2); :}
+		|	expr:e1 DIVIDE expr:e2
+					{: RESULT = new Expr(e1, new BinaryOperator("/"), e2); :}
+		|	expr:e1 ADD expr:e2
+					{: RESULT = new Expr(e1, new BinaryOperator("+"), e2); :}
+		|	expr:e1 SUBTRACT expr:e2
+					{: RESULT = new Expr(e1, new BinaryOperator("-"), e2); :}
+		|	expr:e1 LESS_THAN expr:e2
+					{: RESULT = new Expr(e1, new BinaryOperator("<"), e2); :}
+		|	expr:e1 GREATER_THAN expr:e2
+					{: RESULT = new Expr(e1, new BinaryOperator(">"), e2); :}
+		|	expr:e1 LESS_THAN_EQUAL expr:e2
+					{: RESULT = new Expr(e1, new BinaryOperator("<="), e2); :}
+		|	expr:e1 GREATER_THAN_EQUAL expr:e2
+					{: RESULT = new Expr(e1, new BinaryOperator(">="), e2); :}
+		|	expr:e1 EQUAL expr:e2
+					{: RESULT = new Expr(e1, new BinaryOperator("=="), e2); :}
+		|	expr:e1 NOT_EQUAL expr:e2
+					{: RESULT = new Expr(e1, new BinaryOperator("<>"), e2); :}
+		|	expr:e1 OR expr:e2
+					{: RESULT = new Expr(e1, new BinaryOperator("||"), e2); :}
+		|	expr:e1 AND expr:e2
+					{: RESULT = new Expr(e1, new BinaryOperator("&&"), e2); :}
+        |	LEFT_BRACKET expr:e1 QUESTION expr:e2 COLON expr:e3 RIGHT_BRACKET
+						{: RESULT = new Expr(e1, e2, e3); :}
+		;
+
+/*
+binaryOp ::=	MULTIPLY
+				{: RESULT = "*"; :}
+		|	DIVIDE
+				{: RESULT = "/"; :}
+		|	ADD
+				{: RESULT = "+"; :}
+		|   SUBTRACT
+				{: RESULT = "-"; :}
+		|   LESS_THAN
+				{: RESULT = "<"; :}
+		|   GREATER_THAN
+				{: RESULT = ">"; :}
+		|   LESS_THAN_EQUAL
+				{: RESULT = "<="; :}
+		|   GREATER_THAN_EQUAL
+				{: RESULT = ">="; :}
+		|   EQUAL
+				{: RESULT = "=="; :}
+		|	OR
+				{: RESULT = "||"; :}
+        |   AND
+				{: RESULT = "&&"; :}
+        ;
+*/
